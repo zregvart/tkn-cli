@@ -692,8 +692,6 @@ github.com/google/go-containerregistry/pkg/authn/k8schain
 # github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20221017135236-9b4fdd506cdd
 ## explicit; go 1.17
 github.com/google/go-containerregistry/pkg/authn/kubernetes
-# github.com/google/go-github/v45 v45.2.0
-## explicit; go 1.17
 # github.com/google/go-github/v50 v50.2.0
 ## explicit; go 1.17
 github.com/google/go-github/v50/github
@@ -1205,7 +1203,7 @@ github.com/syndtr/goleveldb/leveldb/opt
 github.com/syndtr/goleveldb/leveldb/storage
 github.com/syndtr/goleveldb/leveldb/table
 github.com/syndtr/goleveldb/leveldb/util
-# github.com/tektoncd/chains v0.15.1-0.20230410133139-e87d044eb6ff
+# github.com/tektoncd/chains v0.15.1-0.20230410133139-e87d044eb6ff => github.com/zregvart/chains v0.8.1-0.20230411115934-b67a11be62c8
 ## explicit; go 1.19
 github.com/tektoncd/chains/pkg/artifacts
 github.com/tektoncd/chains/pkg/chains
@@ -2531,3 +2529,4 @@ sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.3.0
 ## explicit; go 1.12
 sigs.k8s.io/yaml
+# github.com/tektoncd/chains => github.com/zregvart/chains v0.8.1-0.20230411115934-b67a11be62c8

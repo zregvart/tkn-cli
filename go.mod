@@ -318,3 +318,5 @@ require (
 	sigs.k8s.io/release-utils v0.7.3 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 )
+
+replace github.com/tektoncd/chains => github.com/zregvart/chains v0.8.1-0.20230411115934-b67a11be62c8
