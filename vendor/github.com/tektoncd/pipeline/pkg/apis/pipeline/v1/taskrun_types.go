@@ -37,7 +37,7 @@ type TaskRunSpec struct {
 	Debug *TaskRunDebug `json:"debug,omitempty"`
 	// +optional
 	// +listType=atomic
-	Params []Param `json:"params,omitempty"`
+	Params Params `json:"params,omitempty"`
 	// +optional
 	ServiceAccountName string `json:"serviceAccountName"`
 	// no more than one of the TaskRef and TaskSpec may be specified.
@@ -114,7 +114,7 @@ type TaskRunDebug struct {
 type TaskRunInputs struct {
 	// +optional
 	// +listType=atomic
-	Params []Param `json:"params,omitempty"`
+	Params Params `json:"params,omitempty"`
 }
 
 var taskRunCondSet = apis.NewBatchConditionSet()
@@ -239,6 +239,9 @@ type TaskRunStatusFields struct {
 	// Provenance contains some key authenticated metadata about how a software artifact was built (what sources, what inputs/outputs, etc.).
 	// +optional
 	Provenance *Provenance `json:"provenance,omitempty"`
+
+	// SpanContext contains tracing span context fields
+	SpanContext map[string]string `json:"spanContext,omitempty"`
 }
 
 // TaskRunStepSpec is used to override the values of a Step in the corresponding Task.

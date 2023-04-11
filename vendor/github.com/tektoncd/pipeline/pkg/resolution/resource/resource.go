@@ -44,7 +44,7 @@ type Requester interface {
 type Request interface {
 	Name() string
 	Namespace() string
-	Params() []pipelinev1beta1.Param
+	Params() pipelinev1beta1.Params
 }
 
 // OwnedRequest is implemented by any type implementing Request that also needs
@@ -59,5 +59,5 @@ type OwnedRequest interface {
 type ResolvedResource interface {
 	Data() ([]byte, error)
 	Annotations() map[string]string
-	Source() *pipelinev1beta1.ConfigSource
+	RefSource() *pipelinev1beta1.RefSource
 }

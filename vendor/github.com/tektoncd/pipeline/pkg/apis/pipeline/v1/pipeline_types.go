@@ -24,7 +24,6 @@ import (
 	"github.com/tektoncd/pipeline/pkg/apis/config"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline"
 	"github.com/tektoncd/pipeline/pkg/apis/version"
-
 	"github.com/tektoncd/pipeline/pkg/reconciler/pipeline/dag"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -81,6 +80,10 @@ func (*Pipeline) GetGroupVersionKind() schema.GroupVersionKind {
 
 // PipelineSpec defines the desired state of Pipeline.
 type PipelineSpec struct {
+	// DisplayName is a user-facing name of the pipeline that may be
+	// used to populate a UI.
+	// +optional
+	DisplayName string `json:"displayName,omitempty"`
 	// Description is a user-facing description of the pipeline that may be
 	// used to populate a UI.
 	// +optional
@@ -91,7 +94,7 @@ type PipelineSpec struct {
 	// Params declares a list of input parameters that must be supplied when
 	// this Pipeline is run.
 	// +listType=atomic
-	Params []ParamSpec `json:"params,omitempty"`
+	Params ParamSpecs `json:"params,omitempty"`
 	// Workspaces declares a set of named workspaces that are expected to be
 	// provided by a PipelineRun.
 	// +optional
@@ -160,6 +163,16 @@ type PipelineTask struct {
 	// the execution order of tasks relative to one another.
 	Name string `json:"name,omitempty"`
 
+	// DisplayName is the display name of this task within the context of a Pipeline.
+	// This display name may be used to populate a UI.
+	// +optional
+	DisplayName string `json:"displayName,omitempty"`
+
+	// Description is the description of this task within the context of a Pipeline.
+	// This description may be used to populate a UI.
+	// +optional
+	Description string `json:"description,omitempty"`
+
 	// TaskRef is a reference to a task definition.
 	// +optional
 	TaskRef *TaskRef `json:"taskRef,omitempty"`
@@ -185,7 +198,7 @@ type PipelineTask struct {
 	// Parameters declares parameters passed to this task.
 	// +optional
 	// +listType=atomic
-	Params []Param `json:"params,omitempty"`
+	Params Params `json:"params,omitempty"`
 
 	// Matrix declares parameters used to fan out this task.
 	// +optional
@@ -204,14 +217,11 @@ type PipelineTask struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
-// Matrix is used to fan out Tasks in a Pipeline
-type Matrix struct {
-	// Params is a list of parameters used to fan out the pipelineTask
-	// Params takes only `Parameters` of type `"array"`
-	// Each array element is supplied to the `PipelineTask` by substituting `params` of type `"string"` in the underlying `Task`.
-	// The names of the `params` in the `Matrix` must match the names of the `params` in the underlying `Task` that they will be substituting.
-	// +listType=atomic
-	Params []Param `json:"params,omitempty"`
+// IsCustomTask checks whether an embedded TaskSpec is a Custom Task
+func (et *EmbeddedTask) IsCustomTask() bool {
+	// Note that if `apiVersion` is set to `"tekton.dev/v1beta1"` and `kind` is set to `"Task"`,
+	// the reference will be considered a Custom Task - https://github.com/tektoncd/pipeline/issues/6457
+	return et != nil && et.APIVersion != "" && et.Kind != ""
 }
 
 // validateRefOrSpec validates at least one of taskRef or taskSpec is specified
@@ -275,7 +285,24 @@ func (pt PipelineTask) validateTask(ctx context.Context) (errs *apis.FieldError)
 
 // IsMatrixed return whether pipeline task is matrixed
 func (pt *PipelineTask) IsMatrixed() bool {
-	return pt.Matrix != nil && len(pt.Matrix.Params) > 0
+	return pt.Matrix.HasParams() || pt.Matrix.HasInclude()
+}
+
+// extractAllParams extracts all the parameters in a PipelineTask:
+// - pt.Params
+// - pt.Matrix.Params
+// - pt.Matrix.Include.Params
+func (pt *PipelineTask) extractAllParams() Params {
+	allParams := pt.Params
+	if pt.Matrix.HasParams() {
+		allParams = append(allParams, pt.Matrix.Params...)
+	}
+	if pt.Matrix.HasInclude() {
+		for _, include := range pt.Matrix.Include {
+			allParams = append(allParams, include.Params...)
+		}
+	}
+	return allParams
 }
 
 func (pt *PipelineTask) validateMatrix(ctx context.Context) (errs *apis.FieldError) {
@@ -283,22 +310,10 @@ func (pt *PipelineTask) validateMatrix(ctx context.Context) (errs *apis.FieldErr
 		// This is an alpha feature and will fail validation if it's used in a pipeline spec
 		// when the enable-api-fields feature gate is anything but "alpha".
 		errs = errs.Also(version.ValidateEnabledAPIFields(ctx, "matrix", config.AlphaAPIFields))
-		// Matrix requires "embedded-status" feature gate to be set to "minimal", and will fail
-		// validation if it is anything but "minimal".
-		errs = errs.Also(ValidateEmbeddedStatus(ctx, "matrix", config.MinimalEmbeddedStatus))
-		errs = errs.Also(pt.validateMatrixCombinationsCount(ctx))
+		errs = errs.Also(pt.Matrix.validateCombinationsCount(ctx))
 	}
-	errs = errs.Also(validateParameterInOneOfMatrixOrParams(pt.Matrix, pt.Params))
-	errs = errs.Also(validateParametersInTaskMatrix(pt.Matrix))
-	return errs
-}
-
-func (pt *PipelineTask) validateMatrixCombinationsCount(ctx context.Context) (errs *apis.FieldError) {
-	matrixCombinationsCount := pt.GetMatrixCombinationsCount()
-	maxMatrixCombinationsCount := config.FromContextOrDefaults(ctx).Defaults.DefaultMaxMatrixCombinationsCount
-	if matrixCombinationsCount > maxMatrixCombinationsCount {
-		errs = errs.Also(apis.ErrOutOfBoundsValue(matrixCombinationsCount, 0, maxMatrixCombinationsCount, "matrix"))
-	}
+	errs = errs.Also(pt.Matrix.validateParameterInOneOfMatrixOrParams(pt.Params))
+	errs = errs.Also(pt.Matrix.validateParams())
 	return errs
 }
 
@@ -320,18 +335,6 @@ func (pt PipelineTask) validateEmbeddedOrType() (errs *apis.FieldError) {
 		}
 	}
 	return
-}
-
-// GetMatrixCombinationsCount returns the count of combinations of Parameters generated from the Matrix in PipelineTask.
-func (pt *PipelineTask) GetMatrixCombinationsCount() int {
-	if !pt.IsMatrixed() {
-		return 0
-	}
-	count := 1
-	for _, param := range pt.Matrix.Params {
-		count *= len(param.Value.ArrayVal)
-	}
-	return count
 }
 
 func (pt *PipelineTask) validateResultsFromMatrixedPipelineTasksNotConsumed(matrixedPipelineTasks sets.String) (errs *apis.FieldError) {
