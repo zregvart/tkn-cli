@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tektoncd/cli/pkg/actions"
 	"github.com/tektoncd/cli/pkg/cli"
-	"github.com/tektoncd/cli/pkg/cmd/pipelineresource"
 	"github.com/tektoncd/cli/pkg/cmd/taskrun"
 	"github.com/tektoncd/cli/pkg/file"
 	"github.com/tektoncd/cli/pkg/flags"
@@ -43,7 +42,6 @@ import (
 	"github.com/tektoncd/cli/pkg/workspaces"
 	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/yaml"
@@ -152,7 +150,7 @@ For passing the workspaces via flags:
        storage: 1Gi
 - In case of binding a CSI workspace, you can pass it like -w name=my-csi,csiFile=csi.yaml
   but you need to create a csi.yaml file before hand. Sample contents of the file are as follows:
-  
+
   driver: secrets-store.csi.k8s.io
   readOnly: true
   volumeAttributes:
@@ -532,21 +530,6 @@ func (opt *startOptions) getInputs() error {
 		SkipOptionalWorkspace: opt.SkipOptionalWorkspace,
 	}
 
-	if opt.task.Spec.Resources != nil && !opt.Last && opt.UseTaskRun == "" {
-		if len(opt.InputResources) == 0 {
-			if err := intOpts.TaskInputResources(opt.task, createPipelineResource); err != nil {
-				return err
-			}
-			opt.InputResources = append(opt.InputResources, intOpts.InputResources...)
-		}
-		if len(opt.OutputResources) == 0 {
-			if err := intOpts.TaskOutputResources(opt.task, createPipelineResource); err != nil {
-				return err
-			}
-			opt.OutputResources = append(opt.OutputResources, intOpts.OutputResources...)
-		}
-	}
-
 	params.FilterParamsByType(opt.task.Spec.Params)
 	if !opt.Last && opt.UseTaskRun == "" {
 		skipParams, err := params.ParseParams(opt.Params)
@@ -567,42 +550,6 @@ func (opt *startOptions) getInputs() error {
 	}
 
 	return nil
-}
-
-func createPipelineResource(resType v1alpha1.PipelineResourceType, askOpt survey.AskOpt, p cli.Params, s *cli.Stream) (*v1alpha1.PipelineResource, error) {
-	res := pipelineresource.Resource{
-		AskOpts: askOpt,
-		Params:  p,
-		PipelineResource: v1alpha1.PipelineResource{
-			ObjectMeta: metav1.ObjectMeta{Namespace: p.Namespace()},
-			Spec:       v1alpha1.PipelineResourceSpec{Type: resType},
-		}}
-
-	if err := res.AskMeta(); err != nil {
-		return nil, err
-	}
-
-	resourceTypeParams := map[v1alpha1.PipelineResourceType]func() error{
-		v1alpha1.PipelineResourceTypeGit:         res.AskGitParams,
-		v1alpha1.PipelineResourceTypeStorage:     res.AskStorageParams,
-		v1alpha1.PipelineResourceTypeImage:       res.AskImageParams,
-		v1alpha1.PipelineResourceTypePullRequest: res.AskPullRequestParams,
-	}
-	if res.PipelineResource.Spec.Type != "" {
-		if err := resourceTypeParams[res.PipelineResource.Spec.Type](); err != nil {
-			return nil, err
-		}
-	}
-	cs, err := p.Clients()
-	if err != nil {
-		return nil, err
-	}
-	newRes, err := cs.Resource.TektonV1alpha1().PipelineResources(p.Namespace()).Create(context.Background(), &res.PipelineResource, metav1.CreateOptions{})
-	if err != nil {
-		return nil, err
-	}
-	fmt.Fprintf(s.Out, "New %s resource \"%s\" has been created\n", newRes.Spec.Type, newRes.Name)
-	return newRes, nil
 }
 
 func getTaskV1beta1(gr schema.GroupVersionResource, c *cli.Clients, tName, ns string) (*v1beta1.Task, error) {

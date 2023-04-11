@@ -320,12 +320,6 @@ func TestPipelineDescribe_with_spec_resource_param_run_v1beta1(t *testing.T) {
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name:        "pipeline-param",
@@ -432,12 +426,6 @@ func TestPipelineDescribe_with_multiple_pipelineruns_v1beta1(t *testing.T) {
 						Timeout: &metav1.Duration{
 							Duration: 5 * time.Minute,
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -654,28 +642,6 @@ func TestPipelineDescribe_with_spec_multiple_resource_param_run_v1beta1(t *testi
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "code",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "code-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-					{
-						Name: "artifact-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-					{
-						Name: "repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param",
@@ -797,28 +763,6 @@ func TestPipelineDescribe_with_spec_multiple_resource_param_run_output_v1beta1(t
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "code",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "code-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-					{
-						Name: "artifact-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-					{
-						Name: "repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param",
@@ -912,56 +856,6 @@ func TestPipelineDescribe_with_spec_multiple_resource_param_run_output_v1beta1(t
 	golden.Assert(t, got, fmt.Sprintf("%s.golden", t.Name()))
 }
 
-func TestPipelineDescribe_custom_output_v1beta1(t *testing.T) {
-	clock := clockwork.NewFakeClock()
-	pipelines := []*v1beta1.Pipeline{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "pipeline",
-				Namespace: "ns",
-			},
-			Spec: v1beta1.PipelineSpec{
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
-			},
-		},
-	}
-	namespaces := []*corev1.Namespace{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ns",
-			},
-		},
-	}
-
-	version := "v1beta1"
-	tdc := testDynamic.Options{}
-	dynamic, err := tdc.Client(
-		cb.UnstructuredV1beta1P(pipelines[0], version),
-	)
-	if err != nil {
-		t.Errorf("unable to create dynamic client: %v", err)
-	}
-	cs, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{Namespaces: namespaces, Pipelines: pipelines})
-	cs.Pipeline.Resources = cb.APIResourceList(version, []string{"pipeline", "pipelinerun"})
-	p := &test.Params{Tekton: cs.Pipeline, Clock: clock, Kube: cs.Kube, Dynamic: dynamic}
-	pipeline := Command(p)
-
-	got, err := test.ExecuteCommand(pipeline, "desc", "-o", "name", "-n", "ns", "pipeline")
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-
-	got = strings.TrimSpace(got)
-	if got != "pipeline.tekton.dev/pipeline" {
-		t.Errorf("Result should be 'pipeline.tekton.dev/pipeline' != '%s'", got)
-	}
-}
-
 func TestPipelineDescribe_WithoutNameIfOnlyOnePipelinePresent_v1beta1(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	pipelines := []*v1beta1.Pipeline{
@@ -971,12 +865,6 @@ func TestPipelineDescribe_WithoutNameIfOnlyOnePipelinePresent_v1beta1(t *testing
 				Namespace: "ns",
 			},
 			Spec: v1beta1.PipelineSpec{
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Tasks: []v1beta1.PipelineTask{
 					{
 						Name: "task-1",
@@ -1032,12 +920,6 @@ func TestPipelineDescribe_with_results_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.PipelineSpec{
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Tasks: []v1beta1.PipelineTask{
 					{
 						Name: "task-1",
@@ -1117,12 +999,6 @@ func TestPipelineDescribe_with_workspaces_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.PipelineSpec{
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Tasks: []v1beta1.PipelineTask{
 					{
 						Name: "task-1",
@@ -1250,12 +1126,6 @@ func TestPipelineDescribe_with_OptionalWorkspaces_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.PipelineSpec{
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "name",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Tasks: []v1beta1.PipelineTask{
 					{
 						Name: "task-1",

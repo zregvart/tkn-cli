@@ -127,30 +127,6 @@ func Test_ClusterTask_Start(t *testing.T) {
 				CreationTimestamp: metav1.Time{Time: clock.Now().Add(-1 * time.Minute)},
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -187,24 +163,6 @@ func Test_ClusterTask_Start(t *testing.T) {
 				CreationTimestamp: metav1.Time{Time: clock.Now().Add(-1 * time.Minute)},
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -229,30 +187,6 @@ func Test_ClusterTask_Start(t *testing.T) {
 				CreationTimestamp: metav1.Time{Time: clock.Now().Add(-1 * time.Minute)},
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -903,92 +837,6 @@ func Test_ClusterTask_Start(t *testing.T) {
 	}
 }
 
-func Test_mergeResource(t *testing.T) {
-	res := []v1beta1.TaskResourceBinding{{
-		PipelineResourceBinding: v1beta1.PipelineResourceBinding{
-			Name: "source",
-			ResourceRef: &v1beta1.PipelineResourceRef{
-				Name: "git",
-			},
-		},
-	}}
-
-	_, err := mergeRes(res, []string{"test"})
-	if err == nil {
-		t.Errorf("Expected error")
-	}
-
-	res, err = mergeRes(res, []string{})
-	if err != nil {
-		t.Errorf("Did not expect error")
-	}
-	test.AssertOutput(t, 1, len(res))
-
-	res, err = mergeRes(res, []string{"image=test-1"})
-	if err != nil {
-		t.Errorf("Did not expect error")
-	}
-	test.AssertOutput(t, 2, len(res))
-
-	res, err = mergeRes(res, []string{"image=test-new", "image-2=test-2"})
-	if err != nil {
-		t.Errorf("Did not expect error")
-	}
-	test.AssertOutput(t, 3, len(res))
-}
-
-func Test_parseRes(t *testing.T) {
-	type args struct {
-		res []string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    map[string]v1beta1.TaskResourceBinding
-		wantErr bool
-	}{{
-		name: "Test_parseRes No Err",
-		args: args{
-			res: []string{"source=git", "image=docker2"},
-		},
-		want: map[string]v1beta1.TaskResourceBinding{"source": {
-			PipelineResourceBinding: v1beta1.PipelineResourceBinding{
-				Name: "source",
-				ResourceRef: &v1beta1.PipelineResourceRef{
-					Name: "git",
-				},
-			},
-		}, "image": {
-			PipelineResourceBinding: v1beta1.PipelineResourceBinding{
-				Name: "image",
-				ResourceRef: &v1beta1.PipelineResourceRef{
-					Name: "docker2",
-				},
-			},
-		}},
-		wantErr: false,
-	}, {
-		name: "Test_parseRes Err",
-		args: args{
-			res: []string{"value1", "value2"},
-		},
-		wantErr: true,
-	}}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseRes(tt.args.res)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseRes() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseRes() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_start_use_taskrun_cancelled_status(t *testing.T) {
 	ctasks := []*v1beta1.ClusterTask{
 		{
@@ -996,24 +844,6 @@ func Test_start_use_taskrun_cancelled_status(t *testing.T) {
 				Name: "clustertask",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",

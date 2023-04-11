@@ -200,30 +200,6 @@ func Test_start_task_not_found_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -278,30 +254,6 @@ func Test_start_task_context_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -374,30 +326,6 @@ func Test_start_task_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -498,30 +426,6 @@ func Test_start_task_last_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -767,24 +671,6 @@ func Test_start_use_taskrun_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -901,24 +787,6 @@ func Test_start_use_taskrun_cancelled_status_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1024,30 +892,6 @@ func Test_start_task_last_generate_name_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1188,30 +1032,6 @@ func Test_start_task_last_with_prefix_name_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1351,30 +1171,6 @@ func Test_start_task_with_prefix_name_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1479,13 +1275,12 @@ func Test_start_task_with_prefix_name_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList(versionv1beta1, []string{"task", "taskrun"})
 	dc, _ := tdc.Client(
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 		cb.UnstructuredV1beta1TR(taskruns[0], versionv1beta1))
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task",
@@ -1514,30 +1309,6 @@ func Test_start_task_last_with_inputs_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1705,30 +1476,6 @@ func Test_start_task_last_without_taskrun_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1793,30 +1540,6 @@ func Test_start_task_client_error_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1866,7 +1589,7 @@ func Test_start_task_client_error_v1beta1(t *testing.T) {
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
 
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task,
@@ -1892,30 +1615,6 @@ func Test_start_task_invalid_input_res_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -1955,7 +1654,7 @@ func Test_start_task_invalid_input_res_v1beta1(t *testing.T) {
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
 
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task-1",
@@ -1982,30 +1681,6 @@ func Test_start_task_invalid_workspace_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Steps: []v1beta1.Step{
 					{
 						Name:  "hello",
@@ -2041,7 +1716,7 @@ func Test_start_task_invalid_workspace_v1beta1(t *testing.T) {
 	dc, _ := tdc.Client(
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task-1",
@@ -2064,30 +1739,6 @@ func Test_start_task_invalid_output_res_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -2126,7 +1777,7 @@ func Test_start_task_invalid_output_res_v1beta1(t *testing.T) {
 	dc, _ := tdc.Client(
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task-1",
@@ -2151,30 +1802,6 @@ func Test_start_task_invalid_param_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -2213,7 +1840,7 @@ func Test_start_task_invalid_param_v1beta1(t *testing.T) {
 	dc, _ := tdc.Client(
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task-1",
@@ -2236,30 +1863,6 @@ func Test_start_task_invalid_label_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -2298,7 +1901,7 @@ func Test_start_task_invalid_label_v1beta1(t *testing.T) {
 	dc, _ := tdc.Client(
 		cb.UnstructuredV1beta1T(tasks[0], versionv1beta1),
 	)
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	task := Command(p)
 	got, _ := test.ExecuteCommand(task, "start", "task-1",
@@ -2324,30 +1927,6 @@ func Test_start_task_allkindparam_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -2460,30 +2039,6 @@ func Test_start_task_wrong_param_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",
@@ -2551,24 +2106,6 @@ func TestTaskStart_ExecuteCommand_v1beta1(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",

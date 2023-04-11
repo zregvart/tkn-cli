@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tektoncd/cli/pkg/actions"
 	"github.com/tektoncd/cli/pkg/cli"
-	"github.com/tektoncd/cli/pkg/cmd/pipelineresource"
 	prcmd "github.com/tektoncd/cli/pkg/cmd/pipelinerun"
 	"github.com/tektoncd/cli/pkg/file"
 	"github.com/tektoncd/cli/pkg/flags"
@@ -137,7 +136,7 @@ For passing the workspaces via flags:
        storage: 1Gi
 - In case of binding a CSI workspace, you can pass it like -w name=my-csi,csiFile=csi.yaml
   but you need to create a csi.yaml file before hand. Sample contents of the file are as follows:
-  
+
   driver: secrets-store.csi.k8s.io
   readOnly: true
   volumeAttributes:
@@ -432,27 +431,9 @@ func (opt *startOptions) startPipeline(pipelineStart *v1beta1.Pipeline) error {
 }
 
 func (opt *startOptions) getInput(pipeline *v1beta1.Pipeline) error {
-	cs, err := opt.cliparams.Clients()
-	if err != nil {
-		return err
-	}
-
 	if opt.Last && opt.UsePipelineRun != "" {
 		fmt.Fprintf(opt.stream.Err, "option --last and option --use-pipelinerun are not compatible \n")
-		return err
-	}
-
-	if len(pipeline.Spec.Resources) > 0 && len(opt.Resources) == 0 && !opt.Last && opt.UsePipelineRun == "" {
-		pres, err := getPipelineResources(cs.Resource, opt.cliparams.Namespace())
-		if err != nil {
-			return fmt.Errorf("failed to list PipelineResources from namespace %s: %v", opt.cliparams.Namespace(), err)
-		}
-
-		resources := getPipelineResourcesByFormat(pres.Items)
-
-		if err = opt.getInputResources(resources, pipeline); err != nil {
-			return err
-		}
+		return errors.New("cannot use --last option with --use-pipelinerun option")
 	}
 
 	params.FilterParamsByType(pipeline.Spec.Params)
@@ -467,7 +448,7 @@ func (opt *startOptions) getInput(pipeline *v1beta1.Pipeline) error {
 	}
 
 	if len(opt.Workspaces) == 0 && !opt.Last && opt.UsePipelineRun == "" {
-		if err = opt.getInputWorkspaces(pipeline); err != nil {
+		if err := opt.getInputWorkspaces(pipeline); err != nil {
 			return err
 		}
 	}
@@ -500,57 +481,6 @@ func (opt *startOptions) getTimeouts(pr *v1beta1.PipelineRun) error {
 			return err
 		}
 		pr.Spec.Timeouts.Finally = &metav1.Duration{Duration: timeoutDuration}
-	}
-	return nil
-}
-
-func (opt *startOptions) getInputResources(resources resourceOptionsFilter, pipeline *v1beta1.Pipeline) error {
-	for _, res := range pipeline.Spec.Resources {
-		options := getOptionsByType(resources, string(res.Type))
-		// directly create resource
-		if len(options) == 0 {
-			ns := opt.cliparams.Namespace()
-			fmt.Fprintf(opt.stream.Out, "no PipelineResource of type \"%s\" found in namespace: %s\n", string(res.Type), ns)
-			fmt.Fprintf(opt.stream.Out, "Please create a new \"%s\" resource for PipelineResource \"%s\"\n", string(res.Type), res.Name)
-			newres, err := opt.createPipelineResource(res.Name, res.Type)
-			if err != nil {
-				return err
-			}
-			if newres.Status != nil {
-				fmt.Printf("resource status %s\n\n", newres.Status)
-			}
-			opt.Resources = append(opt.Resources, res.Name+"="+newres.Name)
-			continue
-		}
-
-		// shows create option in the resource list
-		resCreateOpt := fmt.Sprintf("create new \"%s\" resource", res.Type)
-		options = append(options, resCreateOpt)
-		var ans string
-		qs := []*survey.Question{
-			{
-				Name: "pipelineresource",
-				Prompt: &survey.Select{
-					Message: fmt.Sprintf("Choose the %s resource to use for %s:", res.Type, res.Name),
-					Options: options,
-				},
-			},
-		}
-
-		if err := survey.Ask(qs, &ans, opt.askOpts); err != nil {
-			return err
-		}
-
-		if ans == resCreateOpt {
-			newres, err := opt.createPipelineResource(res.Name, res.Type)
-			if err != nil {
-				return err
-			}
-			opt.Resources = append(opt.Resources, res.Name+"="+newres.Name)
-			continue
-		}
-		name := strings.TrimSpace(strings.Split(ans, " ")[0])
-		opt.Resources = append(opt.Resources, res.Name+"="+name)
 	}
 	return nil
 }
@@ -740,43 +670,6 @@ func parseTaskSvc(s []string) (map[string]v1beta1.PipelineTaskRunSpec, error) {
 		}
 	}
 	return svcs, nil
-}
-
-func (opt *startOptions) createPipelineResource(resName string, resType v1alpha1.PipelineResourceType) (*v1alpha1.PipelineResource, error) {
-	res := pipelineresource.Resource{
-		AskOpts: opt.askOpts,
-		Params:  opt.cliparams,
-		PipelineResource: v1alpha1.PipelineResource{
-			ObjectMeta: metav1.ObjectMeta{Namespace: opt.cliparams.Namespace()},
-			Spec:       v1alpha1.PipelineResourceSpec{Type: resType},
-		},
-	}
-
-	if err := res.AskMeta(); err != nil {
-		return nil, err
-	}
-
-	resourceTypeParams := map[v1alpha1.PipelineResourceType]func() error{
-		v1alpha1.PipelineResourceTypeGit:         res.AskGitParams,
-		v1alpha1.PipelineResourceTypeStorage:     res.AskStorageParams,
-		v1alpha1.PipelineResourceTypeImage:       res.AskImageParams,
-		v1alpha1.PipelineResourceTypePullRequest: res.AskPullRequestParams,
-	}
-	if res.PipelineResource.Spec.Type != "" {
-		if err := resourceTypeParams[res.PipelineResource.Spec.Type](); err != nil {
-			return nil, err
-		}
-	}
-	cs, err := opt.cliparams.Clients()
-	if err != nil {
-		return nil, err
-	}
-	newRes, err := cs.Resource.TektonV1alpha1().PipelineResources(opt.cliparams.Namespace()).Create(context.Background(), &res.PipelineResource, metav1.CreateOptions{})
-	if err != nil {
-		return nil, err
-	}
-	fmt.Fprintf(opt.stream.Out, "New %s resource \"%s\" has been created\n", newRes.Spec.Type, newRes.Name)
-	return newRes, nil
 }
 
 func printPipelineRun(output string, s *cli.Stream, pr interface{}) error {

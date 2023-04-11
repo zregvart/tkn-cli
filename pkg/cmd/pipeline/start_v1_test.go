@@ -34,9 +34,7 @@ import (
 	"github.com/tektoncd/cli/test/prompt"
 	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	fakepipelineclientset "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/fake"
-	pipelinetest "github.com/tektoncd/pipeline/test"
 	"gotest.tools/v3/golden"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -2750,132 +2748,6 @@ func Test_mergeResource(t *testing.T) {
 		t.Errorf("Did not expect error")
 	}
 	test.AssertOutput(t, 3, len(pr.Spec.Resources))
-}
-
-func Test_getPipelineResourceByFormat(t *testing.T) {
-	pipelineResources := []*v1alpha1.PipelineResource{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-git",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeGit,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "git@github.com:tektoncd/cli.git",
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-git-fork",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeGit,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "git@github.com:tektoncd-fork/cli.git",
-					},
-					{
-						Name:  "revision",
-						Value: "release",
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-image",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeImage,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "docker.io/tektoncd/cli",
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-pull",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypePullRequest,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "https://github.com/tektoncd/cli/pulls/9",
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-storage",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeStorage,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "location",
-						Value: "/home/tektoncd",
-					},
-				},
-			},
-		},
-	}
-
-	ns := []*corev1.Namespace{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ns",
-			},
-		},
-	}
-
-	cs, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{PipelineResources: pipelineResources, Namespaces: ns})
-	res, _ := getPipelineResources(cs.Resource, "ns")
-	resFormat := getPipelineResourcesByFormat(res.Items)
-
-	output := getOptionsByType(resFormat, "git")
-	expected := []string{"scaffold-git (git@github.com:tektoncd/cli.git)", "scaffold-git-fork (git@github.com:tektoncd-fork/cli.git#release)"}
-	if !reflect.DeepEqual(output, expected) {
-		t.Errorf("output git = %v, want %v", output, expected)
-	}
-
-	output = getOptionsByType(resFormat, "image")
-	expected = []string{"scaffold-image (docker.io/tektoncd/cli)"}
-	if !reflect.DeepEqual(output, expected) {
-		t.Errorf("output image = %v, want %v", output, expected)
-	}
-
-	output = getOptionsByType(resFormat, "pullRequest")
-	expected = []string{"scaffold-pull (https://github.com/tektoncd/cli/pulls/9)"}
-	if !reflect.DeepEqual(output, expected) {
-		t.Errorf("output pullRequest = %v, want %v", output, expected)
-	}
-
-	output = getOptionsByType(resFormat, "storage")
-	expected = []string{"scaffold-storage (/home/tektoncd)"}
-	if !reflect.DeepEqual(output, expected) {
-		t.Errorf("output storage = %v, want %v", output, expected)
-	}
-
-	output = getOptionsByType(resFormat, "file")
-	expected = []string{}
-	if !reflect.DeepEqual(output, expected) {
-		t.Errorf("output error = %v, want %v", output, expected)
-	}
 }
 
 func Test_parseRes(t *testing.T) {

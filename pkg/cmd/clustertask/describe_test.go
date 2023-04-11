@@ -46,30 +46,6 @@ func Test_ClusterTaskDescribe(t *testing.T) {
 				CreationTimestamp: metav1.Time{Time: clock.Now().Add(1 * time.Minute)},
 			},
 			Spec: v1beta1.TaskSpec{
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name:        "myarg",
@@ -109,24 +85,6 @@ func Test_ClusterTaskDescribe(t *testing.T) {
 			},
 			Spec: v1beta1.TaskSpec{
 				Description: "a test description",
-				Resources: &v1beta1.TaskResources{
-					Inputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "my-repo",
-								Type: v1beta1.PipelineResourceTypeGit,
-							},
-						},
-					},
-					Outputs: []v1beta1.TaskResource{
-						{
-							ResourceDeclaration: v1beta1.ResourceDeclaration{
-								Name: "code-image",
-								Type: v1beta1.PipelineResourceTypeImage,
-							},
-						},
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "myarg",

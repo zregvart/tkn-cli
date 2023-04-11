@@ -127,11 +127,6 @@ func (p *TektonParams) Clients(cfg ...*rest.Config) (*Clients, error) {
 		return nil, err
 	}
 
-	resource, err := p.resourceClient(config)
-	if err != nil {
-		return nil, err
-	}
-
 	triggers, err := p.triggersClient(config)
 	if err != nil {
 		return nil, err
@@ -150,7 +145,6 @@ func (p *TektonParams) Clients(cfg ...*rest.Config) (*Clients, error) {
 	p.clients = &Clients{
 		Tekton:   tekton,
 		Kube:     kube,
-		Resource: resource,
 		Triggers: triggers,
 		Dynamic:  dynamic,
 	}

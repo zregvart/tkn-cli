@@ -36,7 +36,6 @@ import (
 	"github.com/tektoncd/cli/test/prompt"
 	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	fakepipelineclientset "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/fake"
 	pipelinetest "github.com/tektoncd/pipeline/test"
 	"gotest.tools/v3/golden"
@@ -136,7 +135,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c1 := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Clock: clock, Resource: cs.Resource}
+	c1 := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Clock: clock}
 
 	pipeline := []*v1beta1.Pipeline{
 		{
@@ -169,16 +168,6 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -249,7 +238,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c2 := &test.Params{Tekton: cs2.Pipeline, Kube: cs2.Kube, Dynamic: dc2, Clock: clock, Resource: cs2.Resource}
+	c2 := &test.Params{Tekton: cs2.Pipeline, Kube: cs2.Kube, Dynamic: dc2, Clock: clock}
 
 	// With list error mocking
 	cs3, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{Pipelines: pipeline, Namespaces: namespaces})
@@ -271,7 +260,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c3 := &test.Params{Tekton: cs3.Pipeline, Kube: cs3.Kube, Dynamic: dc3, Clock: clock, Resource: cs3.Resource}
+	c3 := &test.Params{Tekton: cs3.Pipeline, Kube: cs3.Kube, Dynamic: dc3, Clock: clock}
 
 	// With create error mocking
 	cs4, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{Pipelines: pipeline2, Namespaces: namespaces})
@@ -293,7 +282,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c4 := &test.Params{Tekton: cs4.Pipeline, Kube: cs4.Kube, Dynamic: dc4, Clock: clock, Resource: cs4.Resource}
+	c4 := &test.Params{Tekton: cs4.Pipeline, Kube: cs4.Kube, Dynamic: dc4, Clock: clock}
 
 	// Without related pipelinerun
 	objs := []runtime.Object{
@@ -315,50 +304,16 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c5 := &test.Params{Tekton: cs5.Pipeline, Kube: cs5.Kube, Dynamic: dc5, Clock: clock, Resource: cs5.Resource}
+	c5 := &test.Params{Tekton: cs5.Pipeline, Kube: cs5.Kube, Dynamic: dc5, Clock: clock}
 
 	// pipelineresources data for tests with --filename
 	objs2 := []runtime.Object{}
-	pres := []*v1alpha1.PipelineResource{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scaffold-git",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeGit,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "git@github.com:tektoncd/cli.git",
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "imageres",
-				Namespace: "ns",
-			},
-			Spec: v1alpha1.PipelineResourceSpec{
-				Type: v1alpha1.PipelineResourceTypeImage,
-				Params: []v1alpha1.ResourceParam{
-					{
-						Name:  "url",
-						Value: "gcr.io/christiewilson-catfactory/leeroy-web",
-					},
-				},
-			},
-		},
-	}
 	seedData2, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
-		Namespaces:        namespaces,
-		PipelineResources: pres,
+		Namespaces: namespaces,
 	})
 	cs6 := pipelinetest.Clients{
 		Pipeline: seedData2.Pipeline,
 		Kube:     seedData2.Kube,
-		Resource: seedData2.Resource,
 	}
 	cs6.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	_, tdc6 := newV1beta1PipelineClient(objs2...)
@@ -366,7 +321,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c6 := &test.Params{Tekton: cs6.Pipeline, Kube: cs6.Kube, Dynamic: dc6, Clock: clock, Resource: cs6.Resource}
+	c6 := &test.Params{Tekton: cs6.Pipeline, Kube: cs6.Kube, Dynamic: dc6, Clock: clock}
 
 	cs7, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{Pipelines: pipeline, Namespaces: namespaces})
 	cs7.Pipeline.Resources = cb.APIResourceList(versionv1beta1, []string{"pipeline", "pipelinerun"})
@@ -377,7 +332,7 @@ func TestPipelineStart_ExecuteCommand_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	c7 := &test.Params{Tekton: cs7.Pipeline, Kube: cs7.Kube, Dynamic: dc7, Clock: clock, Resource: cs7.Resource}
+	c7 := &test.Params{Tekton: cs7.Pipeline, Kube: cs7.Kube, Dynamic: dc7, Clock: clock}
 
 	testParams := []struct {
 		name       string
@@ -1081,12 +1036,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 							},
 						},
 					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "git-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-					},
 					Params: []v1beta1.ParamSpec{
 						{
 							Name: "pipeline-param",
@@ -1111,23 +1060,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 								Type:     v1beta1.ParamTypeString,
 								ArrayVal: []string{"revision1", "revision2"},
 							},
-						},
-					},
-				},
-			},
-		},
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "scaffold-git",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeGit,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "git@github.com:tektoncd/cli.git",
 						},
 					},
 				},
@@ -1188,12 +1120,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 							},
 						},
 					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "git-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-					},
 				},
 			},
 		},
@@ -1205,17 +1131,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "newworkspace",
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Name:    "read",
@@ -1232,25 +1147,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "damnworkspace",
-								},
-							},
-						},
-						Outputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name: "workspace",
-									Type: v1beta1.PipelineResourceTypeGit,
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Image:   "ubuntu",
@@ -1316,16 +1212,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 							},
 						},
 					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "git-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-						{
-							Name: "source-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-					},
 				},
 			},
 		},
@@ -1337,17 +1223,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "newworkspace",
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Name:    "read",
@@ -1364,25 +1239,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "damnworkspace",
-								},
-							},
-						},
-						Outputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name: "workspace",
-									Type: v1beta1.PipelineResourceTypeGit,
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Image:   "ubuntu",
@@ -1448,34 +1304,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 							},
 						},
 					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "git-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gitres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeGit,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "https://github.com/GoogleContainerTools/skaffold",
-						},
-						{
-							Name:  "version",
-							Value: "master",
-						},
-					},
 				},
 			},
 		},
@@ -1487,17 +1315,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "newworkspace",
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Name:    "read",
@@ -1514,25 +1331,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "damnworkspace",
-								},
-							},
-						},
-						Outputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name: "workspace",
-									Type: v1beta1.PipelineResourceTypeGit,
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Image:   "ubuntu",
@@ -1598,34 +1396,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 							},
 						},
 					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "git-repo",
-							Type: v1beta1.PipelineResourceTypeGit,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gitres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeGit,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "https://github.com/GoogleContainerTools/skaffold",
-						},
-						{
-							Name:  "version",
-							Value: "master",
-						},
-					},
 				},
 			},
 		},
@@ -1637,17 +1407,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "newworkspace",
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Name:    "read",
@@ -1664,25 +1423,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 					Namespace: "ns",
 				},
 				Spec: v1beta1.TaskSpec{
-					Resources: &v1beta1.TaskResources{
-						Inputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name:       "workspace",
-									Type:       v1beta1.PipelineResourceTypeGit,
-									TargetPath: "damnworkspace",
-								},
-							},
-						},
-						Outputs: []v1beta1.TaskResource{
-							{
-								ResourceDeclaration: v1beta1.ResourceDeclaration{
-									Name: "workspace",
-									Type: v1beta1.PipelineResourceTypeGit,
-								},
-							},
-						},
-					},
 					Steps: []v1beta1.Step{
 						{
 							Image:   "ubuntu",
@@ -1702,179 +1442,7 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 		},
 	})
 
-	// With image resource
 	cs6, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
-		Pipelines: []*v1beta1.Pipeline{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "imagepipeline",
-					Namespace: "ns",
-				},
-				Spec: v1beta1.PipelineSpec{
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "imageres",
-							Type: v1beta1.PipelineResourceTypeImage,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "imageres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeImage,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "gcr.io/christiewilson-catfactory/leeroy-web",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	// With image resource, another pipeline name
-	cs7, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
-		Pipelines: []*v1beta1.Pipeline{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "imagepipeline2",
-					Namespace: "ns",
-				},
-				Spec: v1beta1.PipelineSpec{
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "imageres",
-							Type: v1beta1.PipelineResourceTypeImage,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "imageres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeImage,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "gcr.io/christiewilson-catfactory/leeroy-web",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	// With storage resource
-	cs8, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
-		Pipelines: []*v1beta1.Pipeline{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "storagepipeline",
-					Namespace: "ns",
-				},
-				Spec: v1beta1.PipelineSpec{
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "storageres",
-							Type: v1beta1.PipelineResourceTypeStorage,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "imageres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypeStorage,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "type",
-							Value: "gcs",
-						},
-						{
-							Name:  "location",
-							Value: "gs://some-bucket",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	// With pullRequest resource
-	cs9, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
-		Pipelines: []*v1beta1.Pipeline{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pullrequestpipeline",
-					Namespace: "ns",
-				},
-				Spec: v1beta1.PipelineSpec{
-					Tasks: []v1beta1.PipelineTask{
-						{
-							Name: "unit-test-1",
-							TaskRef: &v1beta1.TaskRef{
-								Name: "unit-test-task",
-							},
-							Resources: &v1beta1.PipelineTaskResources{
-								Inputs: []v1beta1.PipelineTaskInputResource{
-									{
-										Name:     "pullres",
-										Resource: "pullreqres",
-									},
-								},
-							},
-						},
-					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "pullreqres",
-							Type: v1beta1.PipelineResourceTypePullRequest,
-						},
-					},
-				},
-			},
-		},
-
-		PipelineResources: []*v1alpha1.PipelineResource{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pullreqres",
-					Namespace: "ns",
-				},
-				Spec: v1alpha1.PipelineResourceSpec{
-					Type: v1alpha1.PipelineResourceTypePullRequest,
-					Params: []v1alpha1.ResourceParam{
-						{
-							Name:  "url",
-							Value: "https://github.com/tektoncd/cli/pull/1",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	cs12, _ := test.SeedV1beta1TestData(t, pipelinetest.Data{
 		Pipelines: []*v1beta1.Pipeline{
 			{
 				ObjectMeta: metav1.ObjectMeta{
@@ -1896,12 +1464,6 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 									},
 								},
 							},
-						},
-					},
-					Resources: []v1beta1.PipelineDeclaredResource{
-						{
-							Name: "pullreqres",
-							Type: v1beta1.PipelineResourceTypePullRequest,
 						},
 					},
 					Workspaces: []v1beta1.PipelineWorkspaceDeclaration{
@@ -2263,269 +1825,11 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 				},
 			},
 		},
-		{
-			name:               "Create new image resource with existing resource",
-			namespace:          "ns",
-			input:              cs7,
-			last:               false,
-			serviceAccountName: "svc1",
-			serviceAccounts:    []string{"task1=svc1"},
-			prompt: prompt.Prompt{
-				CmdArgs: []string{"imagepipeline2"},
-				Procedure: func(c *expect.Console) error {
-					if _, err := c.ExpectString("Choose the image resource to use for imageres"); err != nil {
-						return err
-					}
 
-					if _, err := c.Send(string(terminal.KeyArrowDown)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("create new \"image\" resource"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a name for a pipeline resource :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("newimageres"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a value for url :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("gcr.io/christiewilson-catfactory/leeroy-web"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a value for digest :"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectEOF(); err != nil {
-						return err
-					}
-
-					tekton := cs7.Pipeline.TektonV1beta1()
-					runs, err := tekton.PipelineRuns("ns").List(context.Background(), metav1.ListOptions{})
-					if err != nil {
-						return err
-					}
-
-					if runs.Items != nil && runs.Items[0].Spec.PipelineRef.Name != "imagepipeline2" {
-						return errors.New("pipelinerun not found")
-					}
-
-					c.Close()
-					return nil
-				},
-			},
-		},
-		{
-			name:               "Create new storage resource with existing resource",
-			namespace:          "ns",
-			input:              cs8,
-			last:               false,
-			serviceAccountName: "svc1",
-			serviceAccounts:    []string{"task1=svc1"},
-			prompt: prompt.Prompt{
-				CmdArgs: []string{"storagepipeline"},
-				Procedure: func(c *expect.Console) error {
-					if _, err := c.ExpectString("Choose the storage resource to use for storageres"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("storageres (gs://some-bucket)"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyArrowDown)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("create new \"storage\" resource"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a name for a pipeline resource :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("new"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("gcs"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a value for location :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("gs://some-bucket"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a value for dir :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("/home"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Secret Key for GOOGLE_APPLICATION_CREDENTIALS :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("service_account.json"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Secret Name for GOOGLE_APPLICATION_CREDENTIALS :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("bucket-sa"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectEOF(); err != nil {
-						return err
-					}
-
-					tekton := cs8.Pipeline.TektonV1beta1()
-					runs, err := tekton.PipelineRuns("ns").List(context.Background(), metav1.ListOptions{})
-					if err != nil {
-						return err
-					}
-
-					if runs.Items != nil && runs.Items[0].Spec.PipelineRef.Name != "storagepipeline" {
-						return errors.New("pipelinerun not found")
-					}
-
-					c.Close()
-					return nil
-				},
-			},
-		},
-		{
-			name:               "Create new pullRequest resource with existing resource",
-			namespace:          "ns",
-			input:              cs9,
-			last:               false,
-			serviceAccountName: "svc1",
-			serviceAccounts:    []string{"task1=svc1"},
-			prompt: prompt.Prompt{
-				CmdArgs: []string{"pullrequestpipeline"},
-				Procedure: func(c *expect.Console) error {
-					if _, err := c.ExpectString("Choose the pullRequest resource to use for pullreqres"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyArrowDown)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("create new \"pullRequest\" resource"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a name for a pipeline resource :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("newpullreq"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Enter a value for url :"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("https://github.com/tektoncd/cli/pull/1"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Do you want to set secrets ?"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Yes"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Secret Key for githubToken"); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("githubToken"); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectString("Secret Name for githubToken "); err != nil {
-						return err
-					}
-
-					if _, err := c.SendLine("githubTokenName"); err != nil {
-						return err
-					}
-
-					if _, err := c.Send(string(terminal.KeyEnter)); err != nil {
-						return err
-					}
-
-					if _, err := c.ExpectEOF(); err != nil {
-						return err
-					}
-
-					tekton := cs9.Pipeline.TektonV1beta1()
-					runs, err := tekton.PipelineRuns("ns").List(context.Background(), metav1.ListOptions{})
-					if err != nil {
-						return err
-					}
-
-					if runs.Items != nil && runs.Items[0].Spec.PipelineRef.Name != "pullrequestpipeline" {
-						return errors.New("pipelinerun not found")
-					}
-
-					c.Close()
-					return nil
-				},
-			},
-		},
 		{
 			name:               "Pipeline with workspace",
 			namespace:          "ns",
-			input:              cs12,
+			input:              cs6,
 			last:               false,
 			serviceAccountName: "svc1",
 			serviceAccounts:    []string{"task1=svc1"},
@@ -2694,9 +1998,8 @@ func TestPipelineStart_Interactive_v1beta1(t *testing.T) {
 	for _, tp := range testParams {
 		t.Run(tp.name, func(t *testing.T) {
 			p := test.Params{
-				Kube:     tp.input.Kube,
-				Tekton:   tp.input.Pipeline,
-				Resource: tp.input.Resource,
+				Kube:   tp.input.Kube,
+				Tekton: tp.input.Pipeline,
 			}
 			p.SetNamespace(tp.namespace)
 
@@ -2754,12 +2057,6 @@ func Test_start_pipeline_v1beta1(t *testing.T) {
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param",
@@ -2799,7 +2096,7 @@ func Test_start_pipeline_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 	c := Command(p)
 
 	got, _ := test.ExecuteCommand(c, "start", pipelineName,
@@ -2877,16 +2174,6 @@ func Test_start_pipeline_last_v1beta1(t *testing.T) {
 								Workspace: "test-workspace",
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -2993,7 +2280,6 @@ func Test_start_pipeline_last_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -3005,7 +2291,7 @@ func Test_start_pipeline_last_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -3079,16 +2365,6 @@ func Test_start_pipeline_last_override_timeout_deprecated_v1beta1(t *testing.T) 
 								Workspace: "test-workspace",
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -3196,7 +2472,6 @@ func Test_start_pipeline_last_override_timeout_deprecated_v1beta1(t *testing.T) 
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -3208,7 +2483,7 @@ func Test_start_pipeline_last_override_timeout_deprecated_v1beta1(t *testing.T) 
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	// Specify new timeout value to override previous value
@@ -3266,16 +2541,6 @@ func Test_start_pipeline_last_without_res_param_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -3370,7 +2635,6 @@ func Test_start_pipeline_last_without_res_param_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -3382,7 +2646,7 @@ func Test_start_pipeline_last_without_res_param_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -3448,16 +2712,6 @@ func Test_start_pipeline_last_merge_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -3562,7 +2816,6 @@ func Test_start_pipeline_last_merge_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -3574,7 +2827,7 @@ func Test_start_pipeline_last_merge_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -3655,16 +2908,6 @@ func Test_start_pipeline_use_pipelinerun_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -3760,7 +3003,6 @@ func Test_start_pipeline_use_pipelinerun_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0], prs[1]}
@@ -3773,7 +3015,7 @@ func Test_start_pipeline_use_pipelinerun_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	// There is no point to checkout otuput since we would be checking if our testdata works!
@@ -3826,16 +3068,6 @@ func Test_start_pipeline_use_pipelinerun_cancelled_status_v1beta1(t *testing.T) 
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -3911,7 +3143,6 @@ func Test_start_pipeline_use_pipelinerun_cancelled_status_v1beta1(t *testing.T) 
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -3923,7 +3154,7 @@ func Test_start_pipeline_use_pipelinerun_cancelled_status_v1beta1(t *testing.T) 
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	_, _ = test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -3976,12 +3207,6 @@ func Test_start_pipeline_allkindparam_v1beta1(t *testing.T) {
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param",
@@ -4029,7 +3254,7 @@ func Test_start_pipeline_allkindparam_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Resource: cs.Resource, Dynamic: dc}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 	pipeline := Command(p)
 
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -4106,16 +3331,6 @@ func Test_start_pipeline_last_generate_name_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -4213,7 +3428,6 @@ func Test_start_pipeline_last_generate_name_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -4225,7 +3439,7 @@ func Test_start_pipeline_last_generate_name_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -4284,16 +3498,6 @@ func Test_start_pipeline_last_with_prefix_name_v1beta1(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
 					},
 				},
 				Params: []v1beta1.ParamSpec{
@@ -4388,7 +3592,6 @@ func Test_start_pipeline_last_with_prefix_name_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -4400,7 +3603,7 @@ func Test_start_pipeline_last_with_prefix_name_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -4463,16 +3666,6 @@ func Test_start_pipeline_with_prefix_name_v1beta1(t *testing.T) {
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param-1",
@@ -4565,7 +3758,6 @@ func Test_start_pipeline_with_prefix_name_v1beta1(t *testing.T) {
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0], prs[0]}
@@ -4577,7 +3769,7 @@ func Test_start_pipeline_with_prefix_name_v1beta1(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
@@ -4719,7 +3911,7 @@ func Test_lastPipelineRun_v1beta1(t *testing.T) {
 					if err != nil {
 						t.Errorf("unable to create dynamic client: %v", err)
 					}
-					p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Clock: clock, Resource: cs.Resource}
+					p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Clock: clock}
 					p.SetNamespace("namespace")
 					return p
 				}(),
@@ -4739,7 +3931,7 @@ func Test_lastPipelineRun_v1beta1(t *testing.T) {
 					if err != nil {
 						t.Errorf("unable to create dynamic client: %v", err)
 					}
-					p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+					p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 					p.SetNamespace("namespace")
 					return p
 				}(),
@@ -4803,16 +3995,6 @@ func Test_start_pipeline_with_skip_optional_workspace_flag_v1beta1(t *testing.T)
 						},
 					},
 				},
-				Resources: []v1beta1.PipelineDeclaredResource{
-					{
-						Name: "git-repo",
-						Type: v1beta1.PipelineResourceTypeGit,
-					},
-					{
-						Name: "build-image",
-						Type: v1beta1.PipelineResourceTypeImage,
-					},
-				},
 				Params: []v1beta1.ParamSpec{
 					{
 						Name: "pipeline-param-1",
@@ -4855,7 +4037,6 @@ func Test_start_pipeline_with_skip_optional_workspace_flag_v1beta1(t *testing.T)
 	cs := pipelinetest.Clients{
 		Pipeline: seedData.Pipeline,
 		Kube:     seedData.Kube,
-		Resource: seedData.Resource,
 	}
 	cs.Pipeline.Resources = cb.APIResourceList("v1beta1", []string{"pipeline", "pipelinerun"})
 	objs := []runtime.Object{ps[0]}
@@ -4866,7 +4047,7 @@ func Test_start_pipeline_with_skip_optional_workspace_flag_v1beta1(t *testing.T)
 	if err != nil {
 		t.Errorf("unable to create dynamic client: %v", err)
 	}
-	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc, Resource: cs.Resource}
+	p := &test.Params{Tekton: cs.Pipeline, Kube: cs.Kube, Dynamic: dc}
 
 	pipeline := Command(p)
 	got, _ := test.ExecuteCommand(pipeline, "start", pipelineName,
